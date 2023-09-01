@@ -1,8 +1,7 @@
-
 #include "Core/Core.h"
 #include "Window/Window.h"
+#include "Pipeline/Pipeline.h"
 
-#include <stdexcept>
 #include <cstdlib>
 #include <iostream>
 
@@ -25,6 +24,7 @@ namespace ClayEngineVk
 
         private:
             Window window{WIDTH, HEIGHT, "Clay Editor Vulkan"};
+            Pipeline pipeline{"Shaders/simple_shader.vert.spv", "Shaders/simple_shader.frag.spv"};
     };
 }
 
@@ -33,11 +33,8 @@ int main()
     help();
     ClayEngineVk::ClayEditorVk editor;
     
-    int i = 0;
-
     try
     {
-        printf("Running: %d\n", i++);
         editor.Run();
     }
     catch (const std::exception& e)
