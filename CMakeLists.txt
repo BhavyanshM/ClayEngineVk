@@ -27,8 +27,8 @@ add_library(ClayEngineVk
         src/ClayEngineVk/Window/Window.cpp
         src/ClayEngineVk/Pipeline/Pipeline.h
         src/ClayEngineVk/Pipeline/Pipeline.cpp
-        src/ClayEngineVk/Device/EngineDevice.h
-        src/ClayEngineVk/Device/EngineDevice.cpp
+        src/ClayEngineVk/Device/Device.h
+        src/ClayEngineVk/Device/Device.cpp
 )
 
 target_include_directories(ClayEngineVk PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

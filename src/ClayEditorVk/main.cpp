@@ -9,22 +9,27 @@ namespace ClayEngineVk
 {
     class ClayEditorVk
     {
-        public:
-            static constexpr int WIDTH = 800;
-            static constexpr int HEIGHT = 600;
+    public:
+        static constexpr int WIDTH = 800;
+        static constexpr int HEIGHT = 600;
 
-            void Run()
+        void Run()
+        {
+
+            while (!window.ShouldClose())
             {
-                
-                while (!window.ShouldClose())
-                {
-                    window.PollEvents();
-                }
+                window.PollEvents();
             }
+        }
 
-        private:
-            Window window{WIDTH, HEIGHT, "Clay Editor Vulkan"};
-            Pipeline pipeline{"Shaders/simple_shader.vert.spv", "Shaders/simple_shader.frag.spv"};
+    private:
+        Window window{WIDTH, HEIGHT, "Clay Editor Vulkan"};
+        Device device{window};
+        Pipeline pipeline{
+            device,
+            "/home/quantum/Workspace/Code/ClayEngineVk/src/ClayEngineVk/Shaders/simple_shader.vert.spv",
+            "/home/quantum/Workspace/Code/ClayEngineVk/src/ClayEngineVk/Shaders/simple_shader.frag.spv",
+            Pipeline::DefaultPipelineConfigInfo(WIDTH, HEIGHT)};
     };
 }
 
@@ -32,12 +37,12 @@ int main()
 {
     help();
     ClayEngineVk::ClayEditorVk editor;
-    
+
     try
     {
         editor.Run();
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;

@@ -6,10 +6,13 @@
 
 namespace ClayEngineVk
 {
-
-    Pipeline::Pipeline(const std::string& vertFilepath, const std::string& fragFilepath)
+    Pipeline::Pipeline( Device& device,
+                        const std::string& vertFilepath, 
+                        const std::string& fragFilepath,
+                        const PipelineConfigInfo& configInfo)
+        : _device(device)
     {
-        CreateGraphicsPipeline(vertFilepath, fragFilepath);
+        CreateGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
     }
 
     std::vector<char> Pipeline::ReadFile(const std::string& filepath)
@@ -32,12 +35,31 @@ namespace ClayEngineVk
         return buffer;        
     }
 
-    void Pipeline::CreateGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath)
+    void Pipeline::CreateGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo)
     {
         auto vertCode = ReadFile(vertFilepath);
         auto fragCode = ReadFile(fragFilepath);
 
         std::cout << "Vertex Shader Code Size: " << vertCode.size() << std::endl;
         std::cout << "Fragment Shader Code Size: " << fragCode.size() << std::endl;
+    }
+
+    void Pipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
+    {
+        VkShaderModuleCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.codeSize = code.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+        if (vkCreateShaderModule(_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create shader module!");
+        }
+    }
+
+    PipelineConfigInfo Pipeline::DefaultPipelineConfigInfo(uint32_t width, uint32_t height)
+    {
+        PipelineConfigInfo configInfo{};
+        return configInfo;
     }
 }

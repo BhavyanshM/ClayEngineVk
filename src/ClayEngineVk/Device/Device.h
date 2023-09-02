@@ -25,7 +25,7 @@ namespace ClayEngineVk
         bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
-    class EngineDevice
+    class Device
     {
     public:
 
@@ -35,14 +35,14 @@ namespace ClayEngineVk
                 const bool enableValidationLayers = true;
         #endif
 
-        EngineDevice(Window &window);
-        ~EngineDevice();
+        Device(Window &window);
+        ~Device();
 
         // Not copyable or movable
-        EngineDevice(const EngineDevice &) = delete;
-        void operator=(const EngineDevice &) = delete;
-        EngineDevice(EngineDevice &&) = delete;
-        EngineDevice &operator=(EngineDevice &&) = delete;
+        Device(const Device &) = delete;
+        void operator=(const Device &) = delete;
+        Device(Device &&) = delete;
+        Device &operator=(Device &&) = delete;
 
         VkCommandPool getCommandPool() { return commandPool; }
         VkDevice device() { return device_; }
