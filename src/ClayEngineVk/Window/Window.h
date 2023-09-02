@@ -20,10 +20,9 @@ namespace ClayEngineVk
 
         void PollEvents();
 
-    private:
         void InitWindow();
 
-        // void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+        void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
         // bool ShouldClose() { return glfwWindowShouldClose(_window); }
 
