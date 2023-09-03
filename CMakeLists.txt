@@ -13,10 +13,6 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # add_subdirectory(src/ClayEngine/Manifolds/)
 
-set(HEADERS 
-    src/ClayEngineVk/Core/Core.h
-)
-
 # set(SOURCES
 #     # src/ClayEditorVk/main.cpp
 # )
@@ -29,6 +25,10 @@ add_library(ClayEngineVk
         src/ClayEngineVk/Pipeline/Pipeline.cpp
         src/ClayEngineVk/Device/Device.h
         src/ClayEngineVk/Device/Device.cpp
+        src/ClayEngineVk/Application/Application.h
+        src/ClayEngineVk/Application/Application.cpp
+        src/ClayEngineVk/SwapChain/SwapChain.h
+        src/ClayEngineVk/SwapChain/SwapChain.cpp
 )
 
 target_include_directories(ClayEngineVk PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

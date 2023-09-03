@@ -2,7 +2,6 @@
 
 #include <cstdio>
 
-void help()
+namespace ClayEngineVk
 {
-    printf("-------------------------------- Clay Engine (Vulkan) --------------------------------------- \n\n");
 }

@@ -24,6 +24,8 @@ namespace ClayEngineVk
 
         void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
+        VkExtent2D GetExtent() { return {static_cast<uint32_t>(_width), static_cast<uint32_t>(_height)}; }
+
         // bool ShouldClose() { return glfwWindowShouldClose(_window); }
 
         // void PollEvents() { glfwPollEvents(); }
