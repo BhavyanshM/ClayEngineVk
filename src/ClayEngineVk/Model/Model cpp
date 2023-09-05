@@ -1,0 +1,18 @@
+#include <Model/Model.h>
+
+namespace ClayEngineVk
+{
+    Model::Model(Device &device, const std::vector<Vertex> &vertices) : device{device}
+    {
+        CreateVertexBuffers(vertices);
+    }
+
+    Model::~Model()
+    {
+        vkDestroyBuffer(device.GetVkDevice(), vertexBuffer, nullptr);
+        vkFreeMemory(device.GetVkDevice(), vertexBufferMemory, nullptr);
+    }
+}
+
+
+
