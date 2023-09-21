@@ -4,6 +4,8 @@ project(ClayEngineVulkan)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(glm REQUIRED)
+
 # find_package(OpenGL REQUIRED)
 
 
@@ -11,11 +13,7 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-# add_subdirectory(src/ClayEngine/Manifolds/)
-
-# set(SOURCES
-#     # src/ClayEditorVk/main.cpp
-# )
+include_directories(glm)
 
 add_library(ClayEngineVk 
         src/ClayEngineVk/Core/Core.h
@@ -29,13 +27,15 @@ add_library(ClayEngineVk
         src/ClayEngineVk/Application/Application.cpp
         src/ClayEngineVk/SwapChain/SwapChain.h
         src/ClayEngineVk/SwapChain/SwapChain.cpp
+        src/ClayEngineVk/Model/Model.h
+        src/ClayEngineVk/Model/Model.cpp
 )
 
 target_include_directories(ClayEngineVk PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(ClayEngineVk PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/ClayEngineVk")
 
 target_link_libraries(ClayEngineVk PUBLIC
-        glfw vulkan dl  pthread  X11  Xxf86vm  Xrandr  Xi
+        glfw vulkan dl  pthread  X11  Xxf86vm  Xrandr  Xi glm::glm
 )
 
 # if(LOG_DEBUG)

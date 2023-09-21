@@ -15,6 +15,7 @@ namespace ClayEngineVk
 
     Application::Application()
     {
+        LoadModels();
         CreatePipelineLayout();
         CreatePipeline();
         CreateCommandBuffers();
@@ -23,6 +24,16 @@ namespace ClayEngineVk
     Application::~Application()
     {
         vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
+    }
+
+    void Application::LoadModels()
+    {
+        std::vector<Model::Vertex> vertices{
+            {{0.0f, -0.5f}},
+            {{0.5f, 0.5f}},
+            {{-0.5f, 0.3f}}};
+
+        model = std::make_unique<Model>(device, vertices);
     }
 
     void Application::CreatePipelineLayout()
@@ -95,7 +106,8 @@ namespace ClayEngineVk
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             pipeline->Bind(commandBuffers[i]);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            model->Bind(commandBuffers[i]);
+            model->Draw(commandBuffers[i]);
 
             vkCmdEndRenderPass(commandBuffers[i]);
 

@@ -5,6 +5,7 @@
 #include "Pipeline/Pipeline.h"
 #include "Device/Device.h"
 #include "SwapChain/SwapChain.h"
+#include "Model/Model.h"
 
 #include <memory>
 #include <stdexcept>
@@ -30,11 +31,13 @@ namespace ClayEngineVk
             void CreatePipeline();
             void CreateCommandBuffers();
             void DrawFrame();
+            void LoadModels();
 
             Window window{WIDTH, HEIGHT, "Clay Editor Vulkan"};
             Device device{window};
             SwapChain swapChain{device, window.GetExtent()};
             std::unique_ptr<ClayEngineVk::Pipeline> pipeline;
+            std::unique_ptr<Model> model;
 
             VkPipelineLayout pipelineLayout;
             std::vector<VkCommandBuffer> commandBuffers;
