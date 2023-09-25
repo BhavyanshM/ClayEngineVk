@@ -17,7 +17,7 @@ namespace ClayEngineVk
     {
         LoadModels();
         CreatePipelineLayout();
-        CreatePipeline();
+        RecreateSwapChain();
         CreateCommandBuffers();
     }
 
@@ -29,9 +29,9 @@ namespace ClayEngineVk
     void Application::LoadModels()
     {
         std::vector<Model::Vertex> vertices{
-            {{0.0f, -0.5f}},
-            {{0.5f, 0.5f}},
-            {{-0.5f, 0.3f}}};
+            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.3f}, {0.0f, 0.0f, 1.0f}}};
 
         model = std::make_unique<Model>(device, vertices);
     }
@@ -53,8 +53,8 @@ namespace ClayEngineVk
 
     void Application::CreatePipeline()
     {
-        auto pipelineConfig = Pipeline::DefaultPipelineConfigInfo(swapChain.Width(), swapChain.Height());
-        pipelineConfig.renderPass = swapChain.GetRenderPass();
+        auto pipelineConfig = Pipeline::DefaultPipelineConfigInfo(swapChain->Width(), swapChain->Height());
+        pipelineConfig.renderPass = swapChain->GetRenderPass();
         pipelineConfig.pipelineLayout = pipelineLayout;
         pipeline = std::make_unique<Pipeline>(
             device, 
@@ -64,9 +64,23 @@ namespace ClayEngineVk
 
     }
 
+    void Application::RecreateSwapChain()
+    {
+        auto extent = window.GetExtent();
+        while (extent.width == 0 || extent.height == 0)
+        {
+            extent = window.GetExtent();
+            glfwWaitEvents();
+        }
+
+        vkDeviceWaitIdle(device.device());
+        swapChain = std::make_unique<SwapChain>(device, extent);
+        CreatePipeline();
+    }
+
     void Application::CreateCommandBuffers()
     {
-        commandBuffers.resize(swapChain.ImageCount());
+        commandBuffers.resize(swapChain->ImageCount());
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -77,58 +91,72 @@ namespace ClayEngineVk
         if (vkAllocateCommandBuffers(device.device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to allocate command buffers!");
+        }        
+    }
+
+    void Application::RecordCommandBuffer(int imageIndex)
+    {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to begin recording command buffer!");
         }
 
-        for (int i = 0; i< commandBuffers.size(); i++)
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = swapChain->GetRenderPass();
+        renderPassInfo.framebuffer = swapChain->GetFrameBuffer(imageIndex);
+
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = swapChain->GetSwapChainExtent();
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+        clearValues[1].depthStencil = {1.0f, 0};
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        pipeline->Bind(commandBuffers[imageIndex]);
+        model->Bind(commandBuffers[imageIndex]);
+        model->Draw(commandBuffers[imageIndex]);
+
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+
+        if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
         {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
-            {
-                throw std::runtime_error("Failed to begin recording command buffer!");
-            }
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = swapChain.GetRenderPass();
-            renderPassInfo.framebuffer = swapChain.GetFrameBuffer(i);
-
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = swapChain.GetSwapChainExtent();
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
-            clearValues[1].depthStencil = {1.0f, 0};
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            pipeline->Bind(commandBuffers[i]);
-            model->Bind(commandBuffers[i]);
-            model->Draw(commandBuffers[i]);
-
-            vkCmdEndRenderPass(commandBuffers[i]);
-
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
-            {
-                throw std::runtime_error("Failed to record command buffer!");
-            }
+            throw std::runtime_error("Failed to record command buffer!");
         }
     }
 
     void Application::DrawFrame()
     {
         uint32_t imageIndex;
-        auto result = swapChain.AcquireNextImage(&imageIndex);
+        auto result = swapChain->AcquireNextImage(&imageIndex);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            RecreateSwapChain();
+            return;
+        }
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
         {
             throw std::runtime_error("Failed to acquire swap chain image!");
         }
 
-        result = swapChain.SubmitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        RecordCommandBuffer(imageIndex);
+        result = swapChain->SubmitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.FrameBufferResized())
+        {
+            window.ResetFrameBufferResizedFlag();
+            RecreateSwapChain();
+            return;
+        }
 
         if (result != VK_SUCCESS)
         {

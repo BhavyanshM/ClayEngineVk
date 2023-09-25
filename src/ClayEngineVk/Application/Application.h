@@ -32,10 +32,12 @@ namespace ClayEngineVk
             void CreateCommandBuffers();
             void DrawFrame();
             void LoadModels();
+            void RecreateSwapChain();
+            void RecordCommandBuffer(int imageIndex);
 
             Window window{WIDTH, HEIGHT, "Clay Editor Vulkan"};
             Device device{window};
-            SwapChain swapChain{device, window.GetExtent()};
+            std::unique_ptr<SwapChain> swapChain;
             std::unique_ptr<ClayEngineVk::Pipeline> pipeline;
             std::unique_ptr<Model> model;
 
