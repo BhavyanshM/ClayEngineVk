@@ -43,7 +43,7 @@ namespace ClayEngineVk
         Device& operator=(const Device &) = delete;
 
         Device(Device &&) = delete;
-        Device &operator=(Device &&) = delete;
+        Device& operator=(Device &&) = delete;
 
         VkCommandPool GetCommandPool() { return commandPool; }
         VkDevice device() { return device_; }
