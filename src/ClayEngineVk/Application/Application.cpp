@@ -53,6 +53,9 @@ namespace ClayEngineVk
 
     void Application::CreatePipeline()
     {
+        assert(swapChain != nullptr && "Cannot create pipeline before swap chain");
+        assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
         PipelineConfigInfo pipelineConfig{};
         Pipeline::DefaultPipelineConfigInfo(pipelineConfig);
         pipelineConfig.renderPass = swapChain->GetRenderPass();
@@ -75,6 +78,21 @@ namespace ClayEngineVk
         }
 
         vkDeviceWaitIdle(device.device());
+
+        if (swapChain == nullptr)
+        {
+            swapChain = std::make_unique<SwapChain>(device, extent);
+        }
+        else
+        {
+            swapChain = std::make_unique<SwapChain>(device, extent, std::move(swapChain));
+            if (swapChain->ImageCount() != commandBuffers.size())
+            {
+                FreeCommandBuffers();
+                CreateCommandBuffers();
+            }
+        }
+
         swapChain = std::make_unique<SwapChain>(device, extent);
         CreatePipeline();
     }
@@ -93,6 +111,12 @@ namespace ClayEngineVk
         {
             throw std::runtime_error("Failed to allocate command buffers!");
         }        
+    }
+
+    void Application::FreeCommandBuffers()
+    {
+        vkFreeCommandBuffers(device.device(), device.GetCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+        commandBuffers.clear();
     }
 
     void Application::RecordCommandBuffer(int imageIndex)

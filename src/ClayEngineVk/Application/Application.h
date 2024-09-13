@@ -30,6 +30,7 @@ namespace ClayEngineVk
             void CreatePipelineLayout();
             void CreatePipeline();
             void CreateCommandBuffers();
+            void FreeCommandBuffers();
             void DrawFrame();
             void LoadModels();
             void RecreateSwapChain();
